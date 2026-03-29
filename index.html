@@ -1,22 +1,35 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Escáner QR</title>
+let escaneado = false;
 
-<link rel="stylesheet" href="style.css">
-<script src="https://unpkg.com/html5-qrcode"></script>
-</head>
+window.onload = iniciar;
 
-<body>
+function iniciar(){
 
-<h2>📷 Escanear QR</h2>
+  const qr = new Html5Qrcode("reader");
 
-<div id="reader"></div>
+  Html5Qrcode.getCameras().then(devices => {
 
-<p id="mensaje">Cargando cámara...</p>
+    if(devices.length === 0){
+      document.getElementById("mensaje").innerHTML = "❌ No hay cámara";
+      return;
+    }
 
-<script src="app.js"></script>
+    let camara = devices[devices.length - 1];
 
-</body>
-</html>
+    qr.start(
+      camara.id,
+      { fps:10, qrbox:250 },
+      (texto) => {
+
+        if(escaneado) return;
+        escaneado = true;
+
+        document.getElementById("mensaje").innerHTML = "QR detectado: " + texto;
+
+        setTimeout(()=> escaneado=false, 3000);
+      }
+    );
+
+  }).catch(()=>{
+    document.getElementById("mensaje").innerHTML = "❌ Permiso denegado";
+  });
+}
